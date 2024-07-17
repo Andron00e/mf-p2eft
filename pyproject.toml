@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "mf-p2eft"
+version = "0.1.0"
+description = "Parameter- and Energy-Efficient Fine-Tuning"
+authors = ["Andron00e"]
+license = "Apache License 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "^24.4.2"
+pre-commit = "^3.7.1"
+isort = "^5.13.2"
+
+[tool.black]
+line-length = 119
+required-version = "22.4.2"
+
+[tool.isort]
+profile = "black"
+line_length = 119
+combine_as_imports = true
+combine_star = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
