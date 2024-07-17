@@ -168,6 +168,9 @@ cython_debug/
 /src/pipeline/lora_high/
 /data/tmp/
 
+# Mac .DS_Store
+.DS_Store
+
 # Ignore all wandb files and directories
 wandb/
 **/wandb/
