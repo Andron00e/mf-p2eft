@@ -2,7 +2,7 @@
 name = "mf-p2eft"
 version = "0.1.0"
 description = "Parameter- and Energy-Efficient Fine-Tuning"
-authors = ["Andron00e <semenov.andrei.v@gmail.com>"]
+authors = ["Andron00e"]
 license = "Apache License 2.0"
 readme = "README.md"
 
