@@ -3,7 +3,7 @@ from torch import nn
 
 
 class L0raConfig:
-    def __init__ 
+    def __init__   
 
 # LoRA 0th reimplementation attempt
 class L0ra(nn.Module):
