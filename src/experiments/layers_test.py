@@ -3,7 +3,7 @@ import torch
 # I have 
 # export PYTHONPATH=~/mf-p2eft/src:$PYTHONPATH
 # export PYTHONPATH=~/mf-p2eft:$PYTHONPATH
-from submodules.minmaxplus.abx import TopK
+from submodules.minmaxplus.abx import TopKp
 from submodules.pam.pam_ops import Linear
 
 # Test
