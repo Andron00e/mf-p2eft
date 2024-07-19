@@ -1,14 +1,18 @@
+from functools import partial
 from typing import Any, Optional, Union
+
+import torch
+import torch.nn as nn
 from peft.tuners.lora.layer import (
     Conv2d, LoraLayer, dispatch_default, Linear as LoraLinear
 )
 from peft.tuners.lora.model import LoraModel
 from peft.tuners.lora.config import LoraConfig
-import torch.nn as nn
-from submodules.minmaxplus.abx import TopK
-from submodules.pam_ops import Linear as PAMLinear
-from functools import partial
-import torch
+
+from models.minmaxplus.abx import TopK
+# I am a poor laptop guy
+# from models.pam.pam_ops import Linear as PAMLinear
+
 
 topg = partial(TopK, k=3)
 
