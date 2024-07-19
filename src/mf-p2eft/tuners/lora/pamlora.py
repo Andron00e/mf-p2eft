@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from peft.tuners.lora.layer import LoraLayer
+from ... import pam_opt, pam_ops, native
 
 
 class PAMLoraLinear(nn.Module, LoraLayer):
@@ -37,9 +38,12 @@ class PAMLoraLinear(nn.Module, LoraLayer):
             lora_dropout_layer = nn.Dropout(p=lora_dropout)
         else:
             lora_dropout_layer = nn.Identity()
-        self.lora_A[adapter_name] = ...
-        self.lora_B[adapter_name] = ...
+        self.lora_A[adapter_name] = pam_ops.Linear(self.in_features, r, bias=False)
+        self.lora_B[adapter_name] = pam_ops.Linear(r, self.out_features, bias=False)
         if use_rslora:
             self.scaling[adapter_name] = lora_alpha / math.sqrt(r)
         else:
             self.scaling[adapter_name] = lora_alpha / r
+
+    def forward(self, x: torch.Tensor):
+        pass
