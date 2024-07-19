@@ -1,50 +1,51 @@
 import math
 import torch
 
-if __package__ is None or __package__ == '':
+if __package__ is None or __package__ == "":
     # uses current directory visibility (running as script / jupyter notebook)
     import utils
 else:
     # uses current package visibility (running as a module)
     from . import utils
 
+
 @torch.jit.script
 def get_exp_mantissa(x):
-    '''
+    """
     Computes the exponent (floor log2) and mantissa fraction for a number x
-    '''
+    """
     x = x.abs()
     x_e = torch.floor(torch.log2(x))  # the exponent of x, -inf for 0
-    x_zm = 2.0 ** x_e  # x rounded down to a power of 2, 0 for 0
+    x_zm = 2.0**x_e  # x rounded down to a power of 2, 0 for 0
     x_m = (x - x_zm) / torch.where(x_zm > 0, x_zm, 1)  # mantissa frac, 0 for 0
     return x_e, x_m
 
 
 @torch.jit.script
 def pa_log2_fwd(x):
-    '''
+    """
     Piecewise affine log2 (segments between points x=2**k for integer k),
     ignoring the sign of the input x.
-    '''
+    """
     x_e, x_m = get_exp_mantissa(x)
     return x_e + x_m
 
 
 @torch.jit.script
 def pa_exp2_fwd(x):
-    '''
+    """
     Piecewise affine exp2 (segments between int values of x)
-    '''
+    """
     x_floor = torch.floor(x)
-    return (2 ** x_floor) * torch.where(x_floor.isfinite(), 1 + x - x_floor, 1)
+    return (2**x_floor) * torch.where(x_floor.isfinite(), 1 + x - x_floor, 1)
 
 
 def pam_fwd(A, B, *, offset=None):
-    '''
+    """
     Elementwise Piecewise Affine Multiplication between tensors A and B
     using torch primitives.
     Offset PAMs an additional fixed value with the resulting product.
-    '''
+    """
     if not isinstance(A, torch.Tensor):
         A = torch.as_tensor(A)
     if not isinstance(B, torch.Tensor):
@@ -63,18 +64,18 @@ def pam_fwd(A, B, *, offset=None):
 
 @torch.no_grad()
 def pam_bwd(A, B, delta_C, *, offset=None):
-    '''
+    """
     Compute the exact derivative of C = pam(A, B) w.r.t. A.
     The derivative is given by:
         delta_A = delta_C * 2**(floor(log2(C))-floor(log2(A))) * sign(B)
     and only involves a multiplication by an exact power of 2.
-    '''
+    """
     if offset is not None:
         B = pam_fwd(B, offset)
     _, A_m = get_exp_mantissa(A)
     B_e, B_m = get_exp_mantissa(B)
     slope_exponent = B_e + 1.0 * ((A_m + B_m) >= 1.0)  # Works for zeros
-    return delta_C * torch.sign(B) * 2 ** slope_exponent
+    return delta_C * torch.sign(B) * 2**slope_exponent
 
 
 class pam_autograd(torch.autograd.Function):
@@ -115,11 +116,11 @@ def pam(A, B, *, offset=None, approx_bwd=False):
 
 
 def pam_matmul(A, B, *, offset=None, approx_bwd=False):
-    '''
+    """
     Computes PAM matmul AB with an optional offset using torch primitives.
     Slow and requires and may require large amounts of memory.
     Assumes shapes A is n by k and B is k by m
-    '''
+    """
     return torch.sum(
         pam(
             A.view(A.shape[0], A.shape[1], 1),
@@ -132,11 +133,11 @@ def pam_matmul(A, B, *, offset=None, approx_bwd=False):
 
 
 def pam_matmul_fwd(A, B, *, offset=None):
-    '''
+    """
     Computes PAM matmul AB with an optional offset using torch primitives.
     Slow and requires and may require large amounts of memory.
     Assumes shapes A is n by k and B is k by m
-    '''
+    """
     # Uses autograd through the exact fwd pass (mostly for testing)
     return torch.sum(
         pam_fwd(
@@ -149,11 +150,11 @@ def pam_matmul_fwd(A, B, *, offset=None):
 
 
 def pad_fwd(A, B, *, offset=None):
-    '''
+    """
     Elementwise Piecewise Affine Divsion between tensors A and B
     using torch primitives.
     Offset PAMs an additional fixed value with the resulting product.
-    '''
+    """
     if not isinstance(A, torch.Tensor):
         A = torch.as_tensor(A)
     if not isinstance(B, torch.Tensor):
@@ -197,17 +198,17 @@ def pad(A, B, *, offset=None, approx_bwd=False):
 
 
 def pa_exp_fwd(x, base=math.e, offset=None):
-    '''
+    """
     Piecewise exp using pa_exp2
-    '''
+    """
     e_factor = torch.log2(torch.tensor(base))
     return pa_exp2_fwd(pam_fwd(x, e_factor, offset=offset))
 
 
 def pa_log_fwd(x, base=math.e, offset=None):
-    '''
+    """
     Piecewise log using pa_log2
-    '''
+    """
     base = torch.tensor(base)
     return pad_fwd(pa_log2_fwd(x), torch.log2(base), offset=offset)
 
@@ -223,7 +224,7 @@ class pa_exp_autograd(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, delta_Y):
-        A, = ctx.saved_tensors
+        (A,) = ctx.saved_tensors
         base = ctx.base
         offset = ctx.offset
 
@@ -263,7 +264,7 @@ class pa_log_autograd(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, delta_Y):
-        A, = ctx.saved_tensors
+        (A,) = ctx.saved_tensors
         base = ctx.base
         offset = ctx.offset
 

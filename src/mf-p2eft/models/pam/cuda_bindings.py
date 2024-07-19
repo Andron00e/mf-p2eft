@@ -5,24 +5,25 @@ import pathlib
 import torch
 from torch.utils.cpp_extension import load
 
-if __package__ is None or __package__ == '':
+if __package__ is None or __package__ == "":
     # uses current directory visibility (running as script / jupyter notebook)
     import utils
 else:
     # uses current package visibility (running as a module)
     from . import utils
 
-kernels_path = str(pathlib.Path(__file__).parent.resolve() / 'cuda_kernels.cu')
+kernels_path = str(pathlib.Path(__file__).parent.resolve() / "cuda_kernels.cu")
 # See more flags https://pytorch.org/docs/stable/cpp_extension.html#torch.utils.cpp_extension.load
-build_dir = pathlib.Path('/tmp/pam_build')
+build_dir = pathlib.Path("/tmp/pam_build")
 build_dir.mkdir(exist_ok=True)
 cuda_kernels = load(
-    name='cuda_kernels',
+    name="cuda_kernels",
     sources=[kernels_path],
     verbose=True,
-    extra_cuda_cflags=['-std=c++17', '-O3'],
+    extra_cuda_cflags=["-std=c++17", "-O3"],
     build_directory=build_dir,
 )
+
 
 class pam_autograd(torch.autograd.Function):
     @staticmethod
@@ -84,9 +85,13 @@ class pad_autograd(torch.autograd.Function):
         approx_A, approx_B = approx_bwd
 
         if approx_A:
-            delta_A = cuda_kernels.pam_fwd(cuda_kernels.pad_fwd(torch.ones_like(B), B, offset), delta_Y.contiguous(), offset)
+            delta_A = cuda_kernels.pam_fwd(
+                cuda_kernels.pad_fwd(torch.ones_like(B), B, offset), delta_Y.contiguous(), offset
+            )
         else:
-            delta_A = cuda_kernels.pam_bwd(A, cuda_kernels.pad_fwd(torch.ones_like(B), B, offset), delta_Y.contiguous(), 1.0)
+            delta_A = cuda_kernels.pam_bwd(
+                A, cuda_kernels.pad_fwd(torch.ones_like(B), B, offset), delta_Y.contiguous(), 1.0
+            )
 
         if approx_B:
             dY_dB = cuda_kernels.pad_fwd(cuda_kernels.pad_fwd(A, B, offset), B, offset)
@@ -186,7 +191,6 @@ class standard_matmul_autograd(torch.autograd.Function):
         fwd = cuda_kernels.standard_bmm if BMM else cuda_kernels.standard_matmul
         return fwd(A, B, A_rm, B_rm, 1.0)  # Offset (1.0) is ignored for standard_matmul
 
-
     @staticmethod
     def backward(ctx, delta_Y):
         A, B = ctx.saved_tensors
@@ -220,7 +224,7 @@ class pa_exp_autograd(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, delta_Y):
-        X, = ctx.saved_tensors
+        (X,) = ctx.saved_tensors
         base = ctx.base
         offset = ctx.offset
         approx_bwd = ctx.approx_bwd
@@ -260,7 +264,7 @@ class pa_log_autograd(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, delta_Y):
-        X, = ctx.saved_tensors
+        (X,) = ctx.saved_tensors
         base = ctx.base
         offset = ctx.offset
         approx_bwd = ctx.approx_bwd

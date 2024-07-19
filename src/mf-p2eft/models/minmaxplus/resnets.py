@@ -15,9 +15,7 @@ class TropicalBasicBlock(torch.nn.Module):
 
         self.shortcut = torch.nn.Sequential()
         if input != outputs:
-            self.shortcut = torch.nn.Sequential(
-                modules.MinPlus(input, outputs), modules.Max_B_Plus(outputs, outputs)
-            )
+            self.shortcut = torch.nn.Sequential(modules.MinPlus(input, outputs), modules.Max_B_Plus(outputs, outputs))
 
     def forward(self, x):
         out = self.l2(self.l1(x))
@@ -37,9 +35,7 @@ class TropcialBottleneck(torch.nn.Module):
 
         self.shortcut = torch.nn.Sequential()
         if input != outputs:
-            self.shortcut = torch.nn.Sequential(
-                modules.MinPlus(input, outputs), modules.Max_B_Plus(outputs, outputs)
-            )
+            self.shortcut = torch.nn.Sequential(modules.MinPlus(input, outputs), modules.Max_B_Plus(outputs, outputs))
 
     def _make_layer(self, block, input, outout):
         return torch.nn.Sequential(block(input, outout))
@@ -53,7 +49,7 @@ class TropcialBottleneck(torch.nn.Module):
 
 class ResNet(torch.nn.Module):
     def __init__(self, input, block, num_classes=10):
-        super(ResNet, self).__init__()       
+        super(ResNet, self).__init__()
         self.layer1 = self._make_layer(block, input, 1024)
         self.layer2 = self._make_layer(block, 1024, 512)
         self.layer3 = modules.MinPlus(512, 256)
@@ -88,19 +84,15 @@ class ResNetConv(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
             modules.MinPlus(64 * 4 * 4, 64 * 2 * 2),
-            modules.Max_B_Plus(64 * 2 * 2, 64)
+            modules.Max_B_Plus(64 * 2 * 2, 64),
         )
 
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.fc = nn.Sequential(        
-            modules.MinPlus(512, 256),
-            modules.Max_B_Plus(256, num_classes)
-        )
-        
-        
+        self.fc = nn.Sequential(modules.MinPlus(512, 256), modules.Max_B_Plus(256, num_classes))
+
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []

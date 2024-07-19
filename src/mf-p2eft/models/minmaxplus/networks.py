@@ -147,24 +147,16 @@ def mnist_leaky_deep_tropical_net(input, middle, is_weight_tracking=False):
 def mnist_single_tropical_net(input, middle, is_weight_tracking=True, init_std=None):
     return torch.nn.Sequential(
         torch.nn.Flatten(-3),
-        modules.MinPlus(
-            input, middle, is_tracking=is_weight_tracking, init_std=init_std
-        ),
-        modules.Max_B_Plus(
-            middle, 10, is_tracking=is_weight_tracking, init_std=init_std
-        ),
+        modules.MinPlus(input, middle, is_tracking=is_weight_tracking, init_std=init_std),
+        modules.Max_B_Plus(middle, 10, is_tracking=is_weight_tracking, init_std=init_std),
     )
 
 
 def synthetic_single_tropical_net(input, middle, is_weight_tracking=True, init_std=None):
     return torch.nn.Sequential(
         torch.nn.Flatten(-3),
-        modules.MinPlus(
-            input, middle, is_tracking=is_weight_tracking, init_std=init_std
-        ),
-        modules.Max_B_Plus(
-            middle, 2, is_tracking=is_weight_tracking, init_std=init_std
-        ),
+        modules.MinPlus(input, middle, is_tracking=is_weight_tracking, init_std=init_std),
+        modules.Max_B_Plus(middle, 2, is_tracking=is_weight_tracking, init_std=init_std),
     )
 
 
@@ -206,6 +198,7 @@ def mnist_multi_tropical_net(input, middle):
         modules.MinPlus(input, middle, is_multi=True),
         modules.Max_B_Plus(middle, 10, is_multi=True),
     )
+
 
 def mnist_multi_tropical_net_tanh(input, middle):
     return torch.nn.Sequential(
@@ -401,9 +394,7 @@ def tropical_net_0_pm(input, middle):
 
 
 def tropical_net_B_pm(input, middle):
-    return torch.nn.Sequential(
-        modules.MinPlus(input, middle), modules.Max_B_Plus(middle, 1)
-    )
+    return torch.nn.Sequential(modules.MinPlus(input, middle), modules.Max_B_Plus(middle, 1))
 
 
 def multi_tropical_net(input, middle):
@@ -426,12 +417,8 @@ def tropical_net_B_pm_tracked(input, middle):
 
 def tropical_net_B_pm_dropout_tracked(input, middle, dropout_prob=1):
     return torch.nn.Sequential(
-        modules.MinPlus(
-            input, middle, is_dropout=True, dropout_probability_bias=dropout_prob
-        ),
-        modules.Max_B_Plus(
-            middle, 1, is_dropout=True, dropout_probability_bias=dropout_prob
-        ),
+        modules.MinPlus(input, middle, is_dropout=True, dropout_probability_bias=dropout_prob),
+        modules.Max_B_Plus(middle, 1, is_dropout=True, dropout_probability_bias=dropout_prob),
     )
 
 

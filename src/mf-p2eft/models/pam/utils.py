@@ -1,10 +1,10 @@
 import torch
 
+
 def to_tensor(*values, device=None):
     for element in values:
         if isinstance(element, torch.Tensor):
-            assert device is None or device == element.device, \
-                f"Mismatching devices {device=}, {element.device=}"
+            assert device is None or device == element.device, f"Mismatching devices {device=}, {element.device=}"
             device = element.device
 
     out_tensors = []

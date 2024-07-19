@@ -31,10 +31,7 @@ def torch_log_softmax2(x, dim=None, dtype=None):
     return x - torch_logsumexp2(x, dim=dim, keepdim=True)
 
 
-def torch_cross_entropy2(
-    x, target, weight=None,
-    ignore_index=- 100, reduction='mean', label_smoothing=0.0
-):
+def torch_cross_entropy2(x, target, weight=None, ignore_index=-100, reduction="mean", label_smoothing=0.0):
     x_log_prob = x - torch_logsumexp2(x, dim=-1)
     if ignore_index is not None:
         # Remove invalid labels before creating one-hot vector
@@ -50,10 +47,10 @@ def torch_cross_entropy2(
         loss_terms = loss_terms * (~ignore_mask.view(-1, 1))
     if weight is not None:
         loss_terms = loss_terms * weight.view(-1, 1)
-    loss = torch.sum(loss_terms, dim=-1) # Per sample
-    if reduction == 'mean':
+    loss = torch.sum(loss_terms, dim=-1)  # Per sample
+    if reduction == "mean":
         loss = torch.mean(loss)
-    elif reduction == 'sum':
+    elif reduction == "sum":
         loss = torch.sum(loss)
     elif reduction is not None:
         raise ValueError("Unknown reduction")

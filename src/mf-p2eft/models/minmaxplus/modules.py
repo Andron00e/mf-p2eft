@@ -32,10 +32,7 @@ class SumTanh(torch.nn.Module):
         torch.nn.init.xavier_uniform_(self.W)
 
     def forward(self, X):
-        summed_out = torch.tanh(
-            self.W.view(1, self.W.shape[0], self.W.shape[1])
-            + X.view(X.shape[0], 1, X.shape[1])
-        )
+        summed_out = torch.tanh(self.W.view(1, self.W.shape[0], self.W.shape[1]) + X.view(X.shape[0], 1, X.shape[1]))
         return torch.sum(summed_out, dim=-1)
 
 
@@ -54,9 +51,7 @@ class SolidLinear(torch.nn.Module):
         if self.kernel:
             return tropical_mmpp.apply(X, self.W)
         else:
-            sum_var = self.W.view(1, self.W.shape[0], self.W.shape[1]) + X.view(
-                X.shape[0], 1, X.shape[1]
-            )
+            sum_var = self.W.view(1, self.W.shape[0], self.W.shape[1]) + X.view(X.shape[0], 1, X.shape[1])
             return sum_var.min(axis=-1).values + sum_var.max(axis=-1).values
 
 
@@ -86,9 +81,7 @@ class MinMaxSigmoid(torch.nn.Module):
         self.kernel = kernel
 
     def forward(self, X):
-        return solidmaxmin.apply(
-            X, self.W_MAX, self.W_MIN, self.W_activation_MAX, self.W_activation_MIN
-        )
+        return solidmaxmin.apply(X, self.W_MAX, self.W_MIN, self.W_activation_MAX, self.W_activation_MIN)
 
     def reset_weight_activation(self):
         self.W_activation_MIN = torch.zeros_like(self.W_MIN)
@@ -228,16 +221,12 @@ class MinPlus(torch.nn.Module):
         if self.is_multi:
             return tropical_multiminp.apply(X, self.W, self.W_activation)
         if self.is_dropout and self.training:
-            idx = np.random.choice(
-                range(self.W.shape[1]), size=1, p=self.dropout_probability
-            )[0]
+            idx = np.random.choice(range(self.W.shape[1]), size=1, p=self.dropout_probability)[0]
             dropout_W = torch.clone(self.W)
 
             if random.random() < self.dropout_probability_bias:
                 dropout_W[:, idx] = float("inf")
-            return tropical_minp.apply(
-                X, dropout_W, self.W_activation, self.normalized_W
-            )
+            return tropical_minp.apply(X, dropout_W, self.W_activation, self.normalized_W)
         return tropical_minp.apply(X, self.W, self.W_activation, self.normalized_W)
 
     def get_weight_activation(self):
@@ -246,10 +235,7 @@ class MinPlus(torch.nn.Module):
     def reset_weight_activation(self):
         if self.is_dropout and torch.sum(self.W_activation) > 0:
             self.dropout_probability = (
-                (torch.sum(self.W_activation, dim=0) / torch.sum(self.W_activation))
-                .cpu()
-                .detach()
-                .numpy()
+                (torch.sum(self.W_activation, dim=0) / torch.sum(self.W_activation)).cpu().detach().numpy()
             )
         self.W_activation = torch.zeros_like(self.W)
 
@@ -272,9 +258,7 @@ class MinPlus(torch.nn.Module):
         if self.normalized_W is None:
             logging.getLogger(__name__).warning("No normalized weight is tracked")
             return
-        updated_W = (1 - lambda_) * self.W + lambda_ * self.normalized_W.to(
-            self.W.device
-        )
+        updated_W = (1 - lambda_) * self.W + lambda_ * self.normalized_W.to(self.W.device)
         self.W.copy_(updated_W)
         self.normalized_W = torch.zeros_like(self.W)
 
@@ -324,15 +308,11 @@ class Max_B_Plus(torch.nn.Module):
         if self.is_multi:
             return tropical_multimax.apply(X, self.W, self.W_activation)
         if self.is_dropout and self.training:
-            idx = np.random.choice(
-                range(self.W.shape[1]), size=1, p=self.dropout_probability
-            )[0]
+            idx = np.random.choice(range(self.W.shape[1]), size=1, p=self.dropout_probability)[0]
             dropout_W = torch.clone(self.W)
             if random.random() < self.dropout_probability_bias:
                 dropout_W[:, idx] = -float("inf")
-            return tropical_maxp.apply(
-                X, dropout_W, self.W_activation, self.normalized_W
-            )
+            return tropical_maxp.apply(X, dropout_W, self.W_activation, self.normalized_W)
         return tropical_maxp.apply(X, self.W, self.W_activation, self.normalized_W)
 
     def get_weight_activation(self):
@@ -341,10 +321,7 @@ class Max_B_Plus(torch.nn.Module):
     def reset_weight_activation(self):
         if self.is_dropout and torch.sum(self.W_activation) > 0:
             self.dropout_probability = (
-                (torch.sum(self.W_activation, dim=0) / torch.sum(self.W_activation))
-                .cpu()
-                .detach()
-                .numpy()
+                (torch.sum(self.W_activation, dim=0) / torch.sum(self.W_activation)).cpu().detach().numpy()
             )
         self.W_activation = torch.zeros_like(self.W)
 
@@ -367,9 +344,7 @@ class Max_B_Plus(torch.nn.Module):
         if self.normalized_W is None:
             logging.getLogger(__name__).warning("No normalized weight is tracked")
             return
-        updated_W = (1 - lambda_) * self.W + lambda_ * self.normalized_W.to(
-            self.W.device
-        )
+        updated_W = (1 - lambda_) * self.W + lambda_ * self.normalized_W.to(self.W.device)
         self.W.copy_(updated_W)
         self.normalized_W = torch.zeros_like(self.W)
 
@@ -398,9 +373,7 @@ class LeakyMinPlus(torch.nn.Module):
         self.is_random = torch.nn.Parameter(torch.Tensor([is_random]), False)
 
     def forward(self, X):
-        return leaky_tropical_minp.apply(
-            X, self.W, self.W_activation, self.leaky_factor, self.is_random
-        )
+        return leaky_tropical_minp.apply(X, self.W, self.W_activation, self.leaky_factor, self.is_random)
 
     def get_weight_activation(self):
         return self.W_activation.cpu().detach().numpy()
@@ -454,9 +427,7 @@ class LeakyMax_B_Plus(torch.nn.Module):
         self.is_random = torch.nn.Parameter(torch.Tensor([is_random]), False)
 
     def forward(self, X):
-        return leaky_tropical_maxp.apply(
-            X, self.W, self.W_activation, self.leaky_factor, self.is_random
-        )
+        return leaky_tropical_maxp.apply(X, self.W, self.W_activation, self.leaky_factor, self.is_random)
 
     def get_weight_activation(self):
         return self.W_activation.cpu().detach().numpy()
@@ -482,13 +453,13 @@ class LeakyMax_B_Plus(torch.nn.Module):
     def reset_normalized_weight(self):
         self.normalized_W = torch.zeros_like(self.W)
 
-        
+
 class SolidConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
         super().__init__()
         self.W = nn.Parameter(torch.empty(out_channels, in_channels, kernel_size, kernel_size))
         torch.nn.init.kaiming_uniform_(self.W, a=math.sqrt(5))
-        
+
         self.stride = stride
         self.padding = padding
 
