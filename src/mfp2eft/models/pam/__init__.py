@@ -8,8 +8,8 @@
 # from .pam_ops import *
 # from .pam_opt import *
 # from . import pam_experimental
+from . import cuda_bindings
 from . import native
 from . import pam_ops
 from . import pam_opt
 from . import utils
-from . import cuda_bindings

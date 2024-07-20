@@ -1,11 +1,3 @@
-from .pam import (
-    utils,
-    cuda_bindings,
-    native,
-    pam_ops,
-    pam_opt,
-)
-
 from .minmaxplus import (
     abx,
     abxresnets,
@@ -14,4 +6,11 @@ from .minmaxplus import (
     networks,
     resnets,
     utils,
+)
+from .pam import (
+    utils,
+    cuda_bindings,
+    native,
+    pam_ops,
+    pam_opt,
 )

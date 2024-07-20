@@ -1,13 +1,10 @@
 import math
-import warnings
-from typing import Any, Optional, Union
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 from peft.tuners.lora.layer import LoraLayer
-from ... import pam_opt, pam_ops, native
+
+from ... import pam_ops
 
 
 class PAMLoraLinear(nn.Module, LoraLayer):
@@ -23,12 +20,8 @@ class PAMLoraLinear(nn.Module, LoraLayer):
         **kwargs,
     ):
         super().__init__()
-        self.adapter_name = adapter_name
-        self.r = r
-        self.lora_alpha = lora_alpha
-        self.lora_dropout = lora_dropout
-        self.init_lora_weights = init_lora_weights
-        self.use_rslora = use_rslora
+        self._active_adapter = adapter_name
+        self.update_layer(adapter_name, r, lora_alpha, lora_dropout, init_lora_weights, use_rslora)
 
     def update_layer(self, adapter_name, r, lora_alpha, lora_dropout, init_lora_weights, use_rslora):
         if r <= 0:
@@ -38,6 +31,7 @@ class PAMLoraLinear(nn.Module, LoraLayer):
             lora_dropout_layer = nn.Dropout(p=lora_dropout)
         else:
             lora_dropout_layer = nn.Identity()
+        self.lora_dropout.update(nn.ModuleDict({adapter_name: lora_dropout_layer}))
         self.lora_A[adapter_name] = pam_ops.Linear(self.in_features, r, bias=False)
         self.lora_B[adapter_name] = pam_ops.Linear(r, self.out_features, bias=False)
         if use_rslora:
@@ -45,5 +39,29 @@ class PAMLoraLinear(nn.Module, LoraLayer):
         else:
             self.scaling[adapter_name] = lora_alpha / r
 
-    def forward(self, x: torch.Tensor):
-        pass
+        self._move_adapter_to_device_of_base_layer(adapter_name)
+        self.set_adapter(self.active_adapters)
+
+    def forward(self, x: torch.Tensor, *args, **kwargs):
+        result = self.base_layer(x)
+
+        if self.disable_adapters:
+            return result
+
+        for active_adapter in self.active_adapters:
+            if active_adapter not in self.lora_A.keys():
+                continue
+
+            lora_A = self.lora_A[active_adapter]
+            lora_B = self.lora_B[active_adapter]
+            dropout = self.lora_dropout[active_adapter]
+            scaling = self.scaling[active_adapter]
+
+            output = lora_B(lora_A(dropout(x)))
+            output = output * scaling
+            result += output
+        return result
+
+    def __repr__(self) -> str:
+        rep = super().__repr__()
+        return "lora." + rep
