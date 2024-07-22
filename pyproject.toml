@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mf-p2eft"
+name = "mfp2eft"
 version = "0.1.0"
 description = "Parameter- and Energy-Efficient Fine-Tuning"
 authors = ["Andron00e"]
@@ -11,10 +11,14 @@ python = "^3.10"
 black = "^24.4.2"
 pre-commit = "^3.7.1"
 isort = "^5.13.2"
+peft = "^0.11.1"
+ninja = "^1.11.1.1"
+huggingface-hub = "^0.24.0"
+einops = "^0.8.0"
 
 [tool.black]
 line-length = 119
-required-version = "22.4.2"
+required-version = "24.4.2"
 
 [tool.isort]
 profile = "black"
