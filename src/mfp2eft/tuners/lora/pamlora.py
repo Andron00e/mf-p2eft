@@ -4,10 +4,11 @@ import torch
 import torch.nn as nn
 from typing import Any, Optional
 from mfp2eft.models.pam import pam_ops
-from peft.tuners.lora.layer import LoraLayer
+from peft.tuners.lora.layer import LoraLayer, dispatch_default
 from peft.tuners.lora.config import LoraConfig
 from peft.tuners.lora.model import LoraModel
-from peft.tuners.tuners_utils import BaseTunerLayer
+
+# from peft.tuners.tuners_utils import BaseTunerLayer
 
 
 class PAMLoraLinear(nn.Module, LoraLayer):
@@ -71,17 +72,29 @@ class PAMLoraLinear(nn.Module, LoraLayer):
         return "lora." + rep
 
 
+class TopGLoraLinear(nn.Module, LoraLayer):
+    def __init__(
+        self,
+        base_layer,
+        adapter_name: str,
+        r: int = 0,
+        lora_alpha: int = 1,
+        lora_dropout: float = 0.0,
+        init_lora_weights: bool = True,
+        use_rslora: bool = False,
+        **kwargs,
+    ):
+        super().__init__()
+        LoraLayer.__init__(self, base_layer)
+        pass
+
+
 def dispatch_pam(
     target: torch.nn.Module,
     adapter_name: str,
     **kwargs: Any,
 ) -> Optional[torch.nn.Module]:
     new_module = None
-
-    if isinstance(target, BaseTunerLayer):
-        target_base_layer = target.get_base_layer()
-    else:
-        target_base_layer = target
 
     # TODO: when we contribute to PEFT with pam_is_available() in src/peft/import_utils.py
     # if pam_is_available():
@@ -91,10 +104,28 @@ def dispatch_pam(
     return new_module
 
 
+def dispatch_topg(
+    target: torch.nn.Module,
+    adapter_name: str,
+    k: int,
+    **kwargs: Any,
+) -> Optional[torch.nn.Module]:
+    # TODO:
+    new_module = TopGLoraLinear(target, adapter_name, **kwargs)
+    return new_module
+
+
 class PAMLoraModel(LoraModel):
     def __init__(self, model: torch.nn.Module, config: LoraConfig, adapter_name: str):
         super().__init__(model, config, adapter_name)
 
     @staticmethod
     def _create_new_module(lora_config, adapter_name, target, **kwargs):
-        pass
+        dispatcher = {
+            "default": dispatch_default,
+            "pam": dispatch_pam,
+            "topg": dispatch_topg,
+        }[adapter_name]
+
+        new_module = dispatcher(target, adapter_name, lora_config=lora_config, **kwargs)
+        return new_module
