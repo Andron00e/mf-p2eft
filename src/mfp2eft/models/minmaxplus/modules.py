@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 import torch
-from kernels.tropical import (
+from mfp2eft.models.minmaxplus.kernels.tropical import (
     tropical_mmpp,
     tropical_maxp,
     tropical_minp,

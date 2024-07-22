@@ -1,6 +1,6 @@
 from functools import partial
 
-from abx import TopK
+from mfp2eft.models.minmaxplus.abx import TopK
 from torch import nn
 
 
