@@ -1,9 +1,7 @@
 from functools import partial
-import torch
-import torch.nn.functional as F
-from torch import nn
 
-from definitions.networks.abx import TopK
+from abx import TopK
+from torch import nn
 
 
 class ResidualBlock(nn.Module):

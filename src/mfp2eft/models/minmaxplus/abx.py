@@ -1,10 +1,8 @@
-import math
-from functools import partial
 import inspect
+import math
+
 import torch
 import torch.nn as nn
-import torch.functional as F
-
 
 # log(1 + x) is ~lin as x->0 and ~log(x) as x->infty
 # C plays the "scaling" role of a plot vertically and horizontally

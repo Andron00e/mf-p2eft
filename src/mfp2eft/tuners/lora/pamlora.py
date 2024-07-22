@@ -2,9 +2,8 @@ import math
 
 import torch
 import torch.nn as nn
+from mfp2eft.models.pam import pam_ops
 from peft.tuners.lora.layer import LoraLayer
-
-from ... import pam_ops
 
 
 class PAMLoraLinear(nn.Module, LoraLayer):

@@ -1,7 +1,5 @@
 # from mmfreelm.models import HGRNBitConfig
 # from transformers import AutoModel
-from peft import get_peft_model, LoraConfig
-import torch
 
 # from atlislib import altislayer
 # from transpplib import transmodel

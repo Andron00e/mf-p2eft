@@ -1,6 +1,6 @@
-from functools import partial
-import time
 import pathlib
+import time
+from functools import partial
 
 import torch
 from torch.utils.cpp_extension import load

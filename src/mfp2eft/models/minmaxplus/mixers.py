@@ -1,6 +1,7 @@
-from torch import nn
 from functools import partial
+
 from einops.layers.torch import Rearrange, Reduce
+from torch import nn
 
 pair = lambda x: x if isinstance(x, tuple) else (x, x)
 

@@ -1,13 +1,10 @@
-import torch
 import logging
 import math
+import random
 
 import numpy as np
 import torch
-from torch import nn
-import random
-from definitions.training.weight_updates import max_update, min_update
-from definitions.networks.kernels.tropical import (
+from kernels.tropical import (
     tropical_mmpp,
     tropical_maxp,
     tropical_minp,
@@ -19,6 +16,8 @@ from definitions.networks.kernels.tropical import (
     track_activation,
     tropical_mmpp_conv,
 )
+from weight_updates import max_update, min_update
+from torch import nn
 
 
 class SumTanh(torch.nn.Module):

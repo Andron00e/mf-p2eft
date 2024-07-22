@@ -1,6 +1,6 @@
-import definitions.networks.modules as modules
-import definitions.networks.mixers as mixers
-import definitions.networks.resnets as resnets
+import mixers
+import modules
+import resnets
 import torch
 
 

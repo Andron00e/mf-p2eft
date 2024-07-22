@@ -1,8 +1,7 @@
+import modules
 import torch
+from modules import SolidConv
 from torch import nn
-import torch.nn.functional as F
-import definitions.networks.modules as modules
-from definitions.networks.modules import SolidConv
 
 
 class TropicalBasicBlock(torch.nn.Module):

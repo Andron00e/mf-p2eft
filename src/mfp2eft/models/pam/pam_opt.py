@@ -1,7 +1,4 @@
-import math
-
 import torch
-from torch.optim import Optimizer
 
 
 class cross_entropy_autograd(torch.autograd.Function):
