@@ -2,8 +2,12 @@ import math
 
 import torch
 import torch.nn as nn
+from typing import Any, Optional
 from mfp2eft.models.pam import pam_ops
 from peft.tuners.lora.layer import LoraLayer
+from peft.tuners.lora.config import LoraConfig
+from peft.tuners.lora.model import LoraModel
+from peft.tuners.tuners_utils import BaseTunerLayer
 
 
 class PAMLoraLinear(nn.Module, LoraLayer):
@@ -65,3 +69,32 @@ class PAMLoraLinear(nn.Module, LoraLayer):
     def __repr__(self) -> str:
         rep = super().__repr__()
         return "lora." + rep
+
+
+def dispatch_pam(
+    target: torch.nn.Module,
+    adapter_name: str,
+    **kwargs: Any,
+) -> Optional[torch.nn.Module]:
+    new_module = None
+
+    if isinstance(target, BaseTunerLayer):
+        target_base_layer = target.get_base_layer()
+    else:
+        target_base_layer = target
+
+    # TODO: when we contribute to PEFT with pam_is_available() in src/peft/import_utils.py
+    # if pam_is_available():
+    #     new_module = PAMLoraLinear(target, adapter_name, **kwargs)
+    #     return new_module
+    new_module = PAMLoraLinear(target, adapter_name, **kwargs)
+    return new_module
+
+
+class PAMLoraModel(LoraModel):
+    def __init__(self, model: torch.nn.Module, config: LoraConfig, adapter_name: str):
+        super().__init__(model, config, adapter_name)
+
+    @staticmethod
+    def _create_new_module(lora_config, adapter_name, target, **kwargs):
+        pass
