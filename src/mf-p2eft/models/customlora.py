@@ -9,8 +9,12 @@ from peft.tuners.lora.layer import (
 from peft.tuners.lora.model import LoraModel
 from peft.tuners.lora.config import LoraConfig
 
-from minmaxplus.abx import TopK
-from pam.pam_ops import Linear as PAMLinear
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from models.minmaxplus.abx import TopK
+from models.pam.pam_ops import Linear as PAMLinear
 
 
 topg = partial(TopK, k=3)
@@ -137,16 +141,16 @@ class CustomLoraModel(LoraModel):
 # =======================
 # the testing goes below
 # =======================
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from peft import LoraModel, LoraConfig
-model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
-tokenizer = AutoTokenizer.from_pretrained("t5-small")
+# from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+# from peft import LoraModel, LoraConfig
+# model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
+# tokenizer = AutoTokenizer.from_pretrained("t5-small")
     
-input_text = "Translate English to French: How are you?"
-inputs = tokenizer(input_text, return_tensors="pt")
+# input_text = "Translate English to French: How are you?"
+# inputs = tokenizer(input_text, return_tensors="pt")
 
-decoder_start_token_id = tokenizer.pad_token_id  
-decoder_input_ids = torch.tensor([[decoder_start_token_id]])
+# decoder_start_token_id = tokenizer.pad_token_id  
+# decoder_input_ids = torch.tensor([[decoder_start_token_id]])
 
 config = LoraConfig(
     r=8,
@@ -155,9 +159,9 @@ config = LoraConfig(
     lora_dropout=0.01,
 )
 
-lora_model = CustomLoraModel(model, config, "pam")
-outputs = lora_model(
-    input_ids=inputs['input_ids'],
-    decoder_input_ids=decoder_input_ids
-)
-print(outputs.logits)
+# lora_model = CustomLoraModel(model, config, "pam")
+# outputs = lora_model(
+#     input_ids=inputs['input_ids'],
+#     decoder_input_ids=decoder_input_ids
+# )
+# print(outputs.logits)
