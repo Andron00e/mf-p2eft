@@ -9,9 +9,8 @@ from peft.tuners.lora.layer import (
 from peft.tuners.lora.model import LoraModel
 from peft.tuners.lora.config import LoraConfig
 
-from models.minmaxplus.abx import TopK
-# I am a poor laptop guy
-# from models.pam.pam_ops import Linear as PAMLinear
+from minmaxplus.abx import TopK
+from pam.pam_ops import Linear as PAMLinear
 
 
 topg = partial(TopK, k=3)
@@ -156,7 +155,7 @@ config = LoraConfig(
     lora_dropout=0.01,
 )
 
-lora_model = CustomLoraModel(model, config, "topg")
+lora_model = CustomLoraModel(model, config, "pam")
 outputs = lora_model(
     input_ids=inputs['input_ids'],
     decoder_input_ids=decoder_input_ids
