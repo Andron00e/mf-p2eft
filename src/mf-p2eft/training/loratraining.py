@@ -27,6 +27,10 @@ model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", 
 #     weight_decay=0.01,
 # )  
  
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from models.customlora import config, CustomLoraModel
 lora_model = CustomLoraModel(model, config, "pam")
 
